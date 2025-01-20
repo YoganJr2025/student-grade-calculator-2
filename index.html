@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ffe9;
+            border: 1px solid #b6f0b6;
+            border-radius: 4px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Student Grade Calculator</h1>
+    <div class="container">
+        <form id="grade-form">
+            <div id="subjects-container">
+                <div class="form-group">
+                    <label>Course 1</label>
+                    <input type="number" placeholder="Mark (0-100)" class="mark" required>
+                    <input type="number" placeholder="Weight (e.g., 1.0, 2.0)" class="weight" required>
+                </div>
+            </div>
+            <button type="button" onclick="addSubject()">Add Another Subject</button>
+            <button type="submit">Calculate Final Grade</button>
+        </form>
+        <div class="results" id="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        let subjectCount = 1;
+
+        // Function to add a new subject input
+        function addSubject() {
+            subjectCount++;
+            const container = document.getElementById('subjects-container');
+            const div = document.createElement('div');
+            div.classList.add('form-group');
+            div.innerHTML = `
+                <label>Course ${subjectCount}</label>
+                <input type="number" placeholder="Mark (0-100)" class="mark" required>
+                <input type="number" placeholder="Weight (e.g., 1.0, 2.0)" class="weight" required>
+            `;
+            container.appendChild(div);
+        }
+
+        // Function to calculate weighted average
+        document.getElementById('grade-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const marks = Array.from(document.querySelectorAll('.mark')).map(input => parseFloat(input.value));
+            const weights = Array.from(document.querySelectorAll('.weight')).map(input => parseFloat(input.value));
+
+            // Input validation
+            if (marks.some(isNaN) || weights.some(isNaN)) {
+                alert('Please fill all fields with valid numbers.');
+                return;
+            }
+
+            let totalWeightedMarks = 0;
+            let totalWeights = 0;
+
+            for (let i = 0; i < marks.length; i++) {
+                if (marks[i] < 0 || marks[i] > 100 || weights[i] <= 0) {
+                    alert('Marks must be between 0-100 and weights must be positive.');
+                    return;
+                }
+                totalWeightedMarks += marks[i] * weights[i];
+                totalWeights += weights[i];
+            }
+
+            if (totalWeights === 0) {
+                alert('Total weight cannot be zero.');
+                return;
+            }
+
+            const finalGrade = (totalWeightedMarks / totalWeights).toFixed(2);
+
+            // Display results
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `<strong>Final Grade:</strong> ${finalGrade}`;
+
+            // Save to local storage
+            const grades = JSON.parse(localStorage.getItem('grades')) || [];
+            grades.push({ marks, weights, finalGrade });
+            localStorage.setItem('grades', JSON.stringify(grades));
+        });
+    </script>
+</body>
+</html>
